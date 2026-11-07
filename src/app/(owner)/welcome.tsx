@@ -9,9 +9,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Redirect, router } from "expo-router";
-import { LogOut } from "lucide-react-native";
-import { logout } from "../../../service/AuthService";
 import { BrandRow } from "../../components/BrandRow";
+import { SignOutButton } from "../../components/SignOutButton";
 import { useAuthStatus } from "../../hooks/useAuthStatus";
 
 const NEXT_STEPS = [
@@ -23,21 +22,14 @@ const NEXT_STEPS = [
 export default function Welcome() {
   const status = useAuthStatus();
   const [name, setName] = useState("");
-  const [signingOut, setSigningOut] = useState(false);
 
   const trimmed = name.trim();
   const firstName = trimmed.split(/\s+/)[0] ?? "";
   const canContinue = trimmed.length > 0;
 
-  const onSignOut = async () => {
-    setSigningOut(true);
-    await logout();
-    router.replace("/login");
-  };
-
   const onSetup = () => {
     if (!canContinue) return;
-    // TODO: the create-store wizard is not built yet; navigate there once it exists.
+    router.push({ pathname: "/create-store", params: { ownerName: trimmed } });
   };
 
   if (status === "checking") return <View className="flex-1 bg-ink" />;
@@ -52,18 +44,7 @@ export default function Welcome() {
         >
           <View className="flex-row items-center justify-between">
             <BrandRow showTag={false} />
-            <Pressable
-              onPress={onSignOut}
-              disabled={signingOut}
-              accessibilityRole="button"
-              accessibilityLabel="Sign out"
-              className="h-11 flex-row items-center rounded-chip border-2 border-hold px-3"
-            >
-              <LogOut size={18} color="#FFFFFF" strokeWidth={2.4} />
-              <Text className="ml-2 font-mono-bold text-xs uppercase tracking-wider text-white">
-                {signingOut ? "Signing out" : "Sign out"}
-              </Text>
-            </Pressable>
+            <SignOutButton />
           </View>
 
           <Text className="mt-10 font-mono-bold text-sm uppercase tracking-wider text-signal">

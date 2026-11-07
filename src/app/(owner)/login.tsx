@@ -11,8 +11,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react-native";
 import { BrandRow } from "../../components/BrandRow";
+import { formatMobile } from "../../utils/phone";
 import { registerUser } from "../../../service/RegisterService";
 import { login } from "../../../service/AuthService";
+import { getHomeRoute } from "../../../service/tokenClaims";
 
 type Mode = "register" | "login";
 
@@ -49,13 +51,6 @@ export default function OwnerAuth() {
       ? emailOk && password.length > 0
       : [mobileDigits.length === 9, emailOk, passwordOk][step]);
 
-  const formatMobile = (v: string) => {
-    const d = v.replace(/\D/g, "").slice(0, 9);
-    return [d.slice(0, 2), d.slice(2, 5), d.slice(5, 9)]
-      .filter(Boolean)
-      .join(" ");
-  };
-
   const switchMode = (next: Mode) => {
     if (next === mode || loading) return;
     setMode(next);
@@ -69,7 +64,8 @@ export default function OwnerAuth() {
     try {
       if (isLogin) {
         await login(email.trim(), password);
-        router.replace("/welcome");
+        // The new access token says whether this user already owns a store.
+        router.replace(await getHomeRoute());
       } else {
         await registerUser({
           email: email.trim(),

@@ -1,9 +1,8 @@
 import { Redirect } from "expo-router";
-import { useAuthStatus } from "../hooks/useAuthStatus";
+import { useStartRoute } from "../hooks/useStartRoute";
 
-// Entry gate: signed-in owners go straight in, everyone else sees login/register.
+// The root layout already worked out the destination while the splash screen was showing,
+// so this redirects instantly and nothing is drawn.
 export default function Index() {
-  const status = useAuthStatus();
-  if (status === "checking") return null; // splash screen is still covering the app
-  return <Redirect href={status === "signedIn" ? "/welcome" : "/login"} />;
+  return <Redirect href={useStartRoute()} />;
 }

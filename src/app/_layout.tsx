@@ -14,6 +14,10 @@ import {
   JetBrainsMono_600SemiBold,
   JetBrainsMono_700Bold,
 } from "@expo-google-fonts/jetbrains-mono";
+import {
+  StartRouteContext,
+  useResolveStartRoute,
+} from "../hooks/useStartRoute";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -26,17 +30,21 @@ export default function RootLayout() {
     JetBrainsMono_600SemiBold,
     JetBrainsMono_700Bold,
   });
+  const startRoute = useResolveStartRoute();
+
+  // Keep the splash screen up until fonts AND the login check are done.
+  const ready = (loaded || !!error) && startRoute !== null;
 
   useEffect(() => {
-    if (loaded || error) SplashScreen.hideAsync();
-  }, [loaded, error]);
+    if (ready) SplashScreen.hideAsync();
+  }, [ready]);
 
-  if (!loaded && !error) return null;
+  if (!ready) return null;
 
   return (
-    <>
+    <StartRouteContext.Provider value={startRoute}>
       <StatusBar style="light" />
       <Stack screenOptions={{ headerShown: false }} />
-    </>
+    </StartRouteContext.Provider>
   );
 }

@@ -1,10 +1,5 @@
 import { api, toApiError } from "./api";
-import {
-  clearTokens,
-  getAccessToken,
-  getRefreshToken,
-  saveTokens,
-} from "./tokenStorage";
+import { clearTokens, getRefreshToken, saveTokens } from "./tokenStorage";
 
 type LoginResponse = {
   accessToken: string;
@@ -28,20 +23,10 @@ export async function verifyEmail(email: string, code: string): Promise<void> {
  * so the user is never stuck signed in on this device.
  */
 export async function logout(): Promise<void> {
-  const [refreshToken, accessToken] = await Promise.all([
-    getRefreshToken(),
-    getAccessToken(),
-  ]);
+  const refreshToken = await getRefreshToken();
   try {
-    if (refreshToken) {
-      await api.post(
-        "/api/auth/logout",
-        { refreshToken },
-        accessToken
-          ? { headers: { Authorization: `Bearer ${accessToken}` } }
-          : undefined,
-      );
-    }
+    // The Authorization header is added by the request interceptor in api.ts.
+    if (refreshToken) await api.post("/api/auth/logout", { refreshToken });
   } catch {
     // Ignore: the server may be unreachable or the token already expired.
   } finally {
